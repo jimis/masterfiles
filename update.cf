@@ -25,7 +25,8 @@ body common control
                   "update/update_processes.cf"
       };
 
-      protocol_version => "latest";
+      # Uncomment to turn on TLS encapsulated network protocol.
+      #protocol_version => "latest";
 }
 
 #############################################################################
