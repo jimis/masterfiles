@@ -173,6 +173,16 @@ bundle agent cfe_internal_update_bins
       ifvarclass => "nova_edition.have_software_dir",
       classes => u_if_else("bin_update_success", "bin_update_fail");
 
+    !am_policy_hub.hpux.enterprise::
+
+      "$(novapkg)"
+        package_policy => "update",
+        package_select => "==",            # picks the newest Nova available
+        package_version => "$(update_def.current_version)",
+        package_method => u_generic( "$(local_software_dir)" ),
+        ifvarclass => "nova_edition.have_software_dir",
+        classes => u_if_else("bin_update_success", "bin_update_fail");
+
     !am_policy_hub.windows.enterprise::
 
       "$(novapkg)"
@@ -601,5 +611,28 @@ body package_method u_generic(repo)
       # package_update_command     => "/bin/sh -c /usr/sbin/inutoc $(repo) && /usr/sbin/installp -qacgXNYd $(repo) cfengine.cfengine-nova$";
 
       package_delete_command     => "/usr/sbin/installp -ug cfengine.cfengine-nova$";
+
+    hpux::
+
+      package_changes => "individual";
+
+      package_list_update_command => "/usr/bin/true";
+      package_list_update_ifelapsed => "$(u_common_knowledge.list_update_ifelapsed_now)";
+
+      package_list_command       => "/usr/sbin/swlist";
+      package_list_name_regex    => "^[^#] +([^ ]+) +[^ ]+";
+      package_list_version_regex => "^[^#] +[^ ]+ +([^ ]+)";
+
+      package_file_repositories  => { "$(repo)" };
+
+      package_installed_regex    => ".*";
+
+      package_name_convention    => "$(name)-$(version)-B.11.23-$(sys.arch).depot";
+      package_delete_convention  => "$(name)";
+
+      package_add_command        => "/usr/sbin/swinstall -s $(repo) $(name)$";
+      package_update_command     => "/usr/sbin/swinstall -s $(repo) $(name)$";
+
+      package_delete_command     => "/usr/sbin/swremove";
 
 }
